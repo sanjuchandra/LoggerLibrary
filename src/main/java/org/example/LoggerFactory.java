@@ -1,17 +1,34 @@
 package org.example;
 
-// Logger Factory
-class LoggerFactory {
-    private static LoggerConfig config;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-    public static void configure(LoggerConfig loggerConfig) {
-        config = loggerConfig;
+public class LoggerFactory {
+    private static final Map<String, LoggerImpl> loggers = new ConcurrentHashMap<>();
+    private static volatile LogConfiguration configuration;
+
+    static {
+        // Load default configuration on startup
+        configure(new LogConfiguration());
     }
 
-    public static Logger getLogger(Class<?> clazz) {
-        if (config == null) {
-            throw new IllegalStateException("LoggerFactory is not configured. Call configure() first.");
-        }
-        return new Logger(config, clazz.getSimpleName());
+    public static void configure(String configFile) {
+        configure(new LogConfiguration(configFile));
+    }
+
+    public static void configure(LogConfiguration config) {
+        configuration = config;
+    }
+
+    public static LoggerImpl getLogger(Class<?> clazz) {
+        return getLogger(clazz.getName());
+    }
+
+    public static LoggerImpl getLogger(String name) {
+        return loggers.computeIfAbsent(name, LoggerImpl::new);
+    }
+
+    static LogConfiguration getConfiguration() {
+        return configuration;
     }
 }
