@@ -3,12 +3,8 @@ package org.example;
 import org.example.logger.Logger;
 import org.example.models.LogMessage;
 import org.example.sink.Sink;
-import org.example.sink.impl.ConsoleSink;
-import org.example.sink.impl.FileSink;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.Map;
 
 public class LoggerImpl implements Logger {
     private final String name;
@@ -20,7 +16,7 @@ public class LoggerImpl implements Logger {
         LogConfiguration config = LoggerFactory.getConfiguration();
         this.minLevel = LogLevel.valueOf(config.getString("log.level", "INFO"));
         try {
-            this.sink = new ConsoleSink(config);
+            this.sink = SinkFactory.get(config);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to create log sink", e);
         }
