@@ -8,43 +8,72 @@ import java.io.*;
 import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FileSink extends AbstractSink implements AutoCloseable {
 
     private final PriorityBlockingQueue<LogMessage> logQueue;
+    private final AtomicBoolean isRunning;
+    private final Thread logProcessorThread;
 
     public FileSink(LogConfiguration config) throws IOException {
         super(config);
-        // Initialize the priority queue with a comparator based on timestamps
-        this.logQueue = new PriorityBlockingQueue<LogMessage>(100, Comparator.comparingLong(log -> log.getTimestamp().toEpochSecond(ZoneOffset.UTC)));
+        this.logQueue = new PriorityBlockingQueue<>(100, Comparator.comparingLong(log -> log.getTimestamp().toEpochSecond(ZoneOffset.UTC)));
+        this.isRunning = new AtomicBoolean(true);
+
+        // Start the log processing thread
+        this.logProcessorThread = new Thread(this::processLogs);
+        this.logProcessorThread.start();
     }
 
     @Override
     public void write(LogMessage message) throws IOException {
         // Add log message to the priority queue
         logQueue.offer(message);
-        processLogs(); // Process logs in order
     }
 
-    private void processLogs() throws IOException {
-        // Fetch and process logs in order of priority
-        LogMessage nextMessage;
-        while ((nextMessage = logQueue.poll()) != null) {
-            String logEntry = formatLogEntry(nextMessage);
-            writer.write(logEntry);
-            if (isSync) {
-                writer.flush();
+    private void processLogs() {
+        while (isRunning.get() || !logQueue.isEmpty()) {
+            try {
+                // Poll the queue and process the log if available
+                LogMessage nextMessage = logQueue.poll();
+                if (nextMessage != null) {
+                    String logEntry = formatLogEntry(nextMessage);
+                    writer.write(logEntry);
+                    if (isSync) {
+                        writer.flush();
+                    }
+                } else {
+                    // If no logs are available, sleep briefly to avoid busy-waiting
+                    Thread.sleep(10);
+                }
+            } catch (InterruptedException | IOException e) {
+                Thread.currentThread().interrupt();
+                e.printStackTrace();
             }
         }
     }
 
+    @Override
     public void close() throws IOException {
-        // Process remaining logs before closing
-        LogMessage nextMessage;
-        while ((nextMessage = logQueue.poll()) != null) {
-            String logEntry = formatLogEntry(nextMessage);
-            writer.write(logEntry);
+        // Signal the log processor thread to stop and wait for it to finish
+        isRunning.set(false);
+        try {
+            logProcessorThread.join();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            e.printStackTrace();
         }
+
+        // Flush remaining logs
+        while (!logQueue.isEmpty()) {
+            LogMessage nextMessage = logQueue.poll();
+            if (nextMessage != null) {
+                String logEntry = formatLogEntry(nextMessage);
+                writer.write(logEntry);
+            }
+        }
+
         writer.flush();
         writer.close();
     }
@@ -65,7 +94,9 @@ public class FileSink extends AbstractSink implements AutoCloseable {
             }
         }
 
-        try (FileInputStream fis = new FileInputStream(file); FileOutputStream fos = new FileOutputStream(fileLocation + ".1"); BufferedOutputStream bos = new BufferedOutputStream(fos)) {
+        try (FileInputStream fis = new FileInputStream(file);
+             FileOutputStream fos = new FileOutputStream(fileLocation + ".1");
+             BufferedOutputStream bos = new BufferedOutputStream(fos)) {
 
             byte[] buffer = new byte[1024];
             int length;
