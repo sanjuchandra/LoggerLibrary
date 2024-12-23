@@ -20,8 +20,7 @@ public class LoggerImpl implements Logger {
         LogConfiguration config = LoggerFactory.getConfiguration();
         this.minLevel = LogLevel.valueOf(config.getString("log.level", "INFO"));
         try {
-//            this.sink = new ConsoleSink(config);
-            this.sink = new FileSink(config);
+            this.sink = SinkFactory.get(config);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to create log sink", e);
         }

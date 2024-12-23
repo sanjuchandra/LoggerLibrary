@@ -17,7 +17,7 @@ public class Main {
         }
 
         // Simulate Log Rotation
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 5; i++) {
             logger.info("MainApp", "Log message " + i);
         }
     }
