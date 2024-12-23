@@ -1,5 +1,8 @@
 package org.example;
 
+import org.example.sink.Sink;
+import org.example.sink.impl.FileSink;
+
 public class Main {
     public static void main(String[] args) {
         // Configure Logger
@@ -15,7 +18,7 @@ public class Main {
         logger.error("MainApp", "Failed to connect to database");
 
         // Simulate Log Rotation
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 10; i++) {
             logger.info("MainApp", "Log message " + i);
         }
     }

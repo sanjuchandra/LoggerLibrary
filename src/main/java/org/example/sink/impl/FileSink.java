@@ -1,4 +1,6 @@
-package org.example;
+package org.example.sink.impl;
+
+import org.example.sink.Sink;
 
 import java.io.*;
 import java.util.concurrent.locks.Lock;
