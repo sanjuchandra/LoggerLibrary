@@ -32,7 +32,20 @@ public abstract class AbstractSink implements Sink {
         StringBuilder sb = new StringBuilder();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(timestampFormat);
 
-        sb.append(message.getLevel()).append(" [").append(message.getTimestamp().format(formatter)).append("] ").append("[").append(message.getThreadName()).append("] ").append("[").append(message.getLoggerName()).append("] ").append(message.getMessage());
+        sb.append(message.getLevel())
+                .append(" [")
+                .append(message.getTimestamp().format(formatter))
+                .append("] ")
+                .append("[")
+                .append(message.getThreadName())
+                .append("] ")
+                .append("[")
+                .append(message.getLoggerName())
+                .append("] ")
+                .append("[")
+                .append(message.getTrackingId())
+                .append("] ")
+                .append(message.getMessage());
 
         if (message.getThrowable() != null) {
             sb.append("\n");
