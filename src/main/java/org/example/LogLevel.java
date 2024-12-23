@@ -1,5 +1,5 @@
 package org.example;
 
 public enum LogLevel {
-    DEBUG, INFO, WARN, ERROR
+    DEBUG, INFO, WARN, ERROR, FATAL
 }
