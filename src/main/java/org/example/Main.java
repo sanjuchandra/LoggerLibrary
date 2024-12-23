@@ -8,6 +8,7 @@ public class Main {
         Logger logger = new Logger(config);
 
         // Log Messages
+        // test
         logger.info("MainApp", "Application started");
         logger.warn("MainApp", "Low memory warning");
         logger.error("MainApp", "Failed to connect to database");
