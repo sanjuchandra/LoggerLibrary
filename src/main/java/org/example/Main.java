@@ -3,6 +3,7 @@ package org.example;
 public class Main {
     public static void main(String[] args) {
         // Configure Logger
+        // default add
         Sink fileSink = new FileSink("application.log", 1024 * 1024); // 1 MB max size
         LoggerConfig config = new LoggerConfig("yyyy-MM-dd HH:mm:ss", LogLevel.INFO, fileSink);
         Logger logger = new Logger(config);
