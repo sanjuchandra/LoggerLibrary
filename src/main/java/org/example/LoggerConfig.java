@@ -1,5 +1,7 @@
 package org.example;
 
+import org.example.sink.Sink;
+
 public class LoggerConfig {
     private final String timestampFormat;
     private final LogLevel logLevel;

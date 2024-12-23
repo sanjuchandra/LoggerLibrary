@@ -1,5 +1,7 @@
 package org.example;
 
+import org.example.sink.Sink;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
