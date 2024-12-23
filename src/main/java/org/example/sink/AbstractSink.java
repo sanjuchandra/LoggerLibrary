@@ -45,6 +45,9 @@ public abstract class AbstractSink implements Sink {
                 .append("[")
                 .append(message.getTrackingId())
                 .append("] ")
+                .append("[")
+                .append(message.getHostName())
+                .append("] ")
                 .append(message.getMessage());
 
         if (message.getThrowable() != null) {
