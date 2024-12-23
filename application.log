@@ -1,5 +1,2 @@
-INFO [2024-12-24 00:24:22] [main] [org.example.Main] Application started
-INFO [2024-12-24 00:27:43] [main] [org.example.Main] Application started
-INFO [2024-12-24 00:28:05] [main] [org.example.Main] Application started
-INFO [2024-12-24 00:29:26] [main] [org.example.Main] Application started
-DEBUG [2024-12-24 00:29:26] [main] [org.example.Main] Processing user 124
+INFO [2024-12-24 01:09:28] [main] [org.example.Main] Application started
+DEBUG [2024-12-24 01:09:28] [main] [org.example.Main] Processing user 124
