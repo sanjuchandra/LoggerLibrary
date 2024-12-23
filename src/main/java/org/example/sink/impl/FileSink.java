@@ -5,38 +5,51 @@ import org.example.LogConfiguration;
 import org.example.models.LogMessage;
 
 import java.io.*;
+import java.time.ZoneOffset;
+import java.util.Comparator;
+import java.util.concurrent.PriorityBlockingQueue;
 
 public class FileSink extends AbstractSink implements AutoCloseable {
 
+    private final PriorityBlockingQueue<LogMessage> logQueue;
+
     public FileSink(LogConfiguration config) throws IOException {
         super(config);
+        // Initialize the priority queue with a comparator based on timestamps
+        this.logQueue = new PriorityBlockingQueue<LogMessage>(100, Comparator.comparingLong(log -> log.getTimestamp().toEpochSecond(ZoneOffset.UTC)));
     }
-
 
     @Override
     public void write(LogMessage message) throws IOException {
-        String logEntry = formatLogEntry(message);
+        // Add log message to the priority queue
+        logQueue.offer(message);
+        processLogs(); // Process logs in order
+    }
 
-        if (lock != null) {
-            lock.lock();
-            try {
-                writer.write(logEntry);
-                if (isSync) writer.flush();
-            } finally {
-                lock.unlock();
-            }
-        } else {
-            rotateLogs();
+    private void processLogs() throws IOException {
+        // Fetch and process logs in order of priority
+        LogMessage nextMessage;
+        while ((nextMessage = logQueue.poll()) != null) {
+            String logEntry = formatLogEntry(nextMessage);
             writer.write(logEntry);
-            if (isSync) writer.flush();
+            if (isSync) {
+                writer.flush();
+            }
         }
     }
 
     public void close() throws IOException {
+        // Process remaining logs before closing
+        LogMessage nextMessage;
+        while ((nextMessage = logQueue.poll()) != null) {
+            String logEntry = formatLogEntry(nextMessage);
+            writer.write(logEntry);
+        }
+        writer.flush();
         writer.close();
     }
 
-    private void rotateLogs() {
+    public void rotateLogs() throws IOException {
         File file = new File(fileLocation);
 
         for (int i = 2; i >= 0; i--) {
@@ -67,5 +80,4 @@ public class FileSink extends AbstractSink implements AutoCloseable {
 
         file.delete();
     }
-
 }

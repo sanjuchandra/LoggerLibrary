@@ -6,7 +6,7 @@ import org.example.util.HostNameUtil;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class LogMessage {
+public class LogMessage{
     private final String loggerName;
     private final LogLevel level;
     private final String message;
@@ -35,4 +35,5 @@ public class LogMessage {
     public String getHostName() { return hostName; }
     public String getTrackingId() { return trackingId; }
     public String getThreadName() { return threadName; }
+
 }

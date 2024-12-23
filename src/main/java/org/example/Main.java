@@ -15,5 +15,10 @@ public class Main {
         } catch (Exception e) {
             logger.error("Failed to process request", e);
         }
+
+        // Simulate Log Rotation
+        for (int i = 0; i < 1000; i++) {
+            logger.info("MainApp", "Log message " + i);
+        }
     }
 }
